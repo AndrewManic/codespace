@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Code Editor</title>
+
+  <!-- CodeMirror CSS for styling and theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/monokai.min.css">
+
+  <!-- CodeMirror JavaScript for editor functionality -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/matchbrackets.min.js"></script>
+</head>
+
+<body>
+  <div style="display: flex; flex-direction: column; align-items: center; max-width: 800px; margin: auto;">
+    <h1>Interactive Code Editor</h1>
+
+    <!-- Language Selection -->
+    <label for="language-select">Choose Language:</label>
+    <select id="language-select">
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="htmlmixed">HTML/CSS/JS</option>
+    </select>
+
+    <!-- Code Editor Area -->
+    <textarea id="editor"></textarea>
+
+    <!-- Action Buttons -->
+    <button onclick="runCode()">Run Code</button>
+    <button onclick="saveCode()">Save Code Snippet</button>
+    <button onclick="downloadCode()">Download Code as .js File</button>
+
+    <!-- Output Display -->
+    <h2>Output:</h2>
+    <pre id="output"></pre>
+  </div>
+</body>
+
+<script>
+  // Initialize the CodeMirror editor
+  const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+    lineNumbers: true,               // Show line numbers in the editor
+    mode: 'javascript',               // Set default language mode (JavaScript)
+    theme: 'monokai',                 // Set Monokai theme
+    autoCloseBrackets: true,          // Enable auto-closing brackets
+    matchBrackets: true               // Highlight matching brackets
+  });
+
+  // Language Switching
+  document.getElementById('language-select').addEventListener('change', (e) => {
+    const selectedLanguage = e.target.value;
+    editor.setOption('mode', selectedLanguage); // Update mode based on user selection
+  });
+
+  // Run Code Function
+  function runCode() {
+    const language = document.getElementById('language-select').value;
+    const code = editor.getValue();
+    const outputElement = document.getElementById('output');
+
+    if (language === 'javascript') {
+      try {
+        outputElement.textContent = eval(code);
+      } catch (error) {
+        outputElement.textContent = error;
+      }
+    } else if (language === 'python') {
+      outputElement.textContent = 'Python support requires a backend API or interpreter.';
+    } else {
+      outputElement.innerHTML = code;
+    }
+  }
+
+  // Save Code Snippet
+  function saveCode() {
+    const code = editor.getValue();
+    localStorage.setItem('savedCode', code);
+    alert('Code Snippet Saved!');
+  }
+
+  // Download Code as JavaScript File
+  function downloadCode() {
+    const code = editor.getValue();
+    const blob = new Blob([code], { type: "text/javascript" });
+    const link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+    link.download = "code.js";
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+  }
+
+  // Load Saved Code on Page Load
+  window.onload = () => {
+    const savedCode = localStorage.getItem('savedCode');
+    if (savedCode) {
+      editor.setValue(savedCode);
+    }
+  };
+</script>
+
